@@ -1,0 +1,25 @@
+version: "3.2"
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+
+  producer:
+    build: producer/
+    ports:
+      - 3000:3000
+
+  consumer1:
+    build: consumer1/
+    ports:
+      - 3001:3001
+
+  consumer2:
+    build: consumer2/
+    ports:
+      - 3002:3002
