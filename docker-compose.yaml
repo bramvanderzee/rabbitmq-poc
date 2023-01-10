@@ -5,21 +5,30 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
-    volumes:
-      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
 
   producer:
-    build: producer/
+    image: rabbitmq-poc/producer
+    build: ./producer
     ports:
       - 3000:3000
+    depends_on:
+      - rabbitmq
+    restart: always
 
   consumer1:
-    build: consumer1/
+    image: rabbitmq-poc/consumer1
+    build: ./consumer1
     ports:
       - 3001:3001
+    depends_on:
+      - rabbitmq
+    restart: always
 
   consumer2:
-    build: consumer2/
+    image: rabbitmq-poc/consumer2
+    build: ./consumer2
     ports:
       - 3002:3002
+    depends_on:
+      - rabbitmq
+    restart: always
