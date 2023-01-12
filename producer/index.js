@@ -1,41 +1,50 @@
-const express = require('express');
-const amqp = require('amqplib');
-const app = express();
-const PORT = 3000;
+const express = require('express')
+const amqp = require('amqplib/callback_api')
+const app = express()
+const PORT = 3000
+const exchange = 'kwetter'
 
-var channel, connection;
+app.use(express.json())
 
-function sleep(millis) {
-	return new Promise(resolve => setTimeout(resolve, millis));
-}
+amqp.connect('amqp://rabbitmq:5672', (err0, connection) => {
+    if (err0) {
+            throw err0
+    }
 
-connectQueue();
-async function connectQueue() {
-	await sleep(5000);
-	try {
-		connection = await amqp.connect("amqp://rabbitmq:5672");
-		channel = await connection.createChannel();
+    connection.createChannel((err1, channel) => {
+        if (err1) {
+            throw err1
+        }
 
-		await channel.assertQueue('test-queue');
-	} catch(err) {
-		console.log(err);
-	}
-}
+        channel.assertExchange(exchange, 'fanout', { durable: false })
+        channel.assertQueue('consumer1', {durable: false}, (err2, q1) => {
+            if (err2) {
+                throw err2
+            }
 
-async function sendData(data) {
-	await channel.sendToQueue('test-queue', Buffer.from(JSON.stringify(data)));
-}
+            channel.bindQueue(q1.queue, exchange, '')
+        })
+        channel.assertQueue('consumer2', {durable: false}, (err3, q2) => {
+            if (err3) {
+                throw err3
+            }
 
-app.use(express.json());
+            channel.bindQueue(q2.queue, exchange, '')
+        })
 
-app.get('/send-msg', (req, res) => {
-	const data = {
-		body: req.body
-	}
+        app.post('/*', (req, res) => {
+            const data = {
+                method: req.method,
+                url: req.url,
+                body: req.body
+            }
 
-	sendData(data);
-	console.log('Message sent to queue');
-	res.send('Message sent.');
-});
+            channel.publish('kwetter', '', Buffer.from(JSON.stringify(data)))
+            console.log('Message sent to queue')
+            res.send('Message sent: ' + JSON.stringify(data))
+        })
 
-app.listen(PORT, () => console.log('Server running on port ' + PORT))
+        app.listen(PORT, () => console.log('Server running on port ' + PORT))
+    })
+})
+

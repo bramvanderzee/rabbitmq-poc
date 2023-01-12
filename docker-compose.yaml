@@ -2,6 +2,10 @@ version: "3.2"
 services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    restart: always
+    volumes:
+      - './data:/var/lib/rabbitmq/mnesia'
     ports:
       - 5672:5672
       - 15672:15672
@@ -9,6 +13,8 @@ services:
   producer:
     image: rabbitmq-poc/producer
     build: ./producer
+    volumes:
+      - './producer/:/usr/src/app'
     ports:
       - 3000:3000
     depends_on:
@@ -17,7 +23,13 @@ services:
 
   consumer1:
     image: rabbitmq-poc/consumer1
-    build: ./consumer1
+    build: ./consumer
+    volumes:
+      - './consumer/:/usr/src/app'
+    environment: 
+      - PORT=3001
+      - EXCHANGE=kwetter
+      - QNAME=consumer1
     ports:
       - 3001:3001
     depends_on:
@@ -26,7 +38,13 @@ services:
 
   consumer2:
     image: rabbitmq-poc/consumer2
-    build: ./consumer2
+    build: ./consumer
+    volumes:
+      - './consumer/:/usr/src/app'
+    environment: 
+      - PORT=3002
+      - EXCHANGE=kwetter
+      - QNAME=consumer2
     ports:
       - 3002:3002
     depends_on:
