@@ -32,6 +32,17 @@ amqp.connect('amqp://rabbitmq:5672', (err0, connection) => {
             channel.bindQueue(q2.queue, exchange, '')
         })
 
+        app.delete('/*/:id', (req, res) => {
+            const data = {
+                body: req.body,
+                id: req.params.id
+            }
+
+            channel.publish('kwetter', '', Buffer.from(JSON.stringify(data)))
+            console.log('Deleted ' + id)
+            res.send('Deleted ' + id)
+        })
+
         app.post('/*', (req, res) => {
             const data = {
                 method: req.method,

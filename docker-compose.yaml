@@ -32,22 +32,12 @@ services:
       - PORT=3001
       - EXCHANGE=kwetter
       - QNAME=consumer1
-      - MONGO_URL=mongodb://root:root@mongo1:27017/data?authSource=admin
+      - MONGO_URL=mongodb://root:root@0.0.0.0:27017/consumer1?authSource=admin
     ports:
       - 3001:3001
     depends_on:
       - rabbitmq
     restart: always
-
-  mongo1:
-    image: mongo:latest
-    container_name: mongo1
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
-      - MONGO_INITDB_DATABASE=data
-    volumes:
-      - 'mongo1:/data/db'
 
   consumer2:
     build:
@@ -59,23 +49,9 @@ services:
       - PORT=3002
       - EXCHANGE=kwetter
       - QNAME=consumer2
-      - MONGO_URL=mongodb://root:root@mongo2:27017/data?authSource=admin
+      - MONGO_URL=mongodb://root:root@0.0.0.0:27017/consumer2?authSource=admin
     ports:
       - 3002:3002
     depends_on:
       - rabbitmq
     restart: always
-
-  mongo2:
-    image: mongo:latest
-    container_name: mongo2
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
-      - MONGO_INITDB_DATABASE=data
-    volumes:
-      - 'mongo2:/data/db'
-
-volumes:
-  mongo1:
-  mongo2:

@@ -37,9 +37,10 @@ amqp.connect('amqp://rabbitmq:5672', (err0, connection) => {
                 json_data = Buffer.from(data.content)
 
                 const model = new Model(json_data.body)
-                model.save().then(() => channel.ack(data))
-
-                console.log('Data: ' + model)
+                model.deleteOne(json_data.id).then(() => {
+                    console.log('Deleted ' + json_data)
+                    channel.ack(data)
+                })
             })
 
             app.get('/get-msg/:id', (req, res) => {

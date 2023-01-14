@@ -1,9 +1,3 @@
-const express = require('express')
-const mongoose = require('mongoose')
-const app = express();
-app.use(express.json());
-
-const PORT = process.env.PORT || 3001;
 const exchange = process.env.EXCHANGE || 'kwetter'
 const queueName = process.env.QNAME || 'consumer'
 const mongourl = process.env.MONGO_URL || 'mongodb://root:root@mongodb:27017/consumer'
@@ -28,26 +22,13 @@ amqp.connect('amqp://rabbitmq:5672', (err0, connection) => {
             }
 
             console.log(mongourl)
-            mongoose.connect(mongourl)
-
-            const Model = mongoose.model('Model', { key: String, value: String })
 
             channel.bindQueue(queue.queue, exchange, '')
             channel.consume(queue.queue, data => {
                 json_data = Buffer.from(data.content)
 
-                const model = new Model(json_data.body)
-                model.save().then(() => channel.ack(data))
-
-                console.log('Data: ' + model)
+                console.log('Data: ' + json_data)
             })
-
-            app.get('/get-msg', (req, res) => {
-                req.query.key
-                Model.findById(req.query.id).then((err, result) => res.send(result))
-            })
-
-            app.listen(PORT, () => console.log("Server running at port " + PORT));
         })
     })
 })
