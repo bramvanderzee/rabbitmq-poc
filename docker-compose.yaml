@@ -11,8 +11,9 @@ services:
       - 15672:15672
 
   producer:
-    image: rabbitmq-poc/producer
-    build: ./producer
+    build:
+      context: ./producer
+      dockerfile: ../Dockerfile
     volumes:
       - './producer/:/usr/src/app'
     ports:
@@ -22,31 +23,59 @@ services:
     restart: always
 
   consumer1:
-    image: rabbitmq-poc/consumer1
-    build: ./consumer
+    build:
+      context: ./consumer1
+      dockerfile: ../Dockerfile
     volumes:
-      - './consumer/:/usr/src/app'
+      - './consumer1/:/usr/src/app'
     environment: 
       - PORT=3001
       - EXCHANGE=kwetter
       - QNAME=consumer1
+      - MONGO_URL=mongodb://root:root@mongo1:27017/data?authSource=admin
     ports:
       - 3001:3001
     depends_on:
       - rabbitmq
     restart: always
 
-  consumer2:
-    image: rabbitmq-poc/consumer2
-    build: ./consumer
+  mongo1:
+    image: mongo:latest
+    container_name: mongo1
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=data
     volumes:
-      - './consumer/:/usr/src/app'
+      - 'mongo1:/data/db'
+
+  consumer2:
+    build:
+      context: ./consumer2
+      dockerfile: ../Dockerfile
+    volumes:
+      - './consumer2/:/usr/src/app'
     environment: 
       - PORT=3002
       - EXCHANGE=kwetter
       - QNAME=consumer2
+      - MONGO_URL=mongodb://root:root@mongo2:27017/data?authSource=admin
     ports:
       - 3002:3002
     depends_on:
       - rabbitmq
     restart: always
+
+  mongo2:
+    image: mongo:latest
+    container_name: mongo2
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=data
+    volumes:
+      - 'mongo2:/data/db'
+
+volumes:
+  mongo1:
+  mongo2:
