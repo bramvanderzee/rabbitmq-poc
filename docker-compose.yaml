@@ -10,6 +10,13 @@ services:
       - 5672:5672
       - 15672:15672
 
+  mongo:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: consumer1
+
   producer:
     build:
       context: ./producer
@@ -32,7 +39,7 @@ services:
       - PORT=3001
       - EXCHANGE=kwetter
       - QNAME=consumer1
-      - MONGO_URL=mongodb://root:root@0.0.0.0:27017/consumer1?authSource=admin
+      - MONGO_URL=mongodb://root:root@mongo:27017/consumer1?authSource=admin
     ports:
       - 3001:3001
     depends_on:

@@ -6,7 +6,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3001;
 const exchange = process.env.EXCHANGE || 'kwetter'
 const queueName = process.env.QNAME || 'consumer'
-const mongourl = process.env.MONGO_URL || 'mongodb://root:root@mongodb:27017/consumer'
+const mongourl = process.env.MONGO_URL || 'mongodb://root:root@host.docker.internal:27017/consumer'
 
 const amqp = require('amqplib/callback_api');
 var json_data;
@@ -40,6 +40,18 @@ amqp.connect('amqp://rabbitmq:5672', (err0, connection) => {
                 model.deleteOne(json_data.id).then(() => {
                     console.log('Deleted ' + json_data)
                     channel.ack(data)
+                })
+            })
+
+            app.post('/post-msg', (req, res) => {
+                const model = new Model(req.body)
+                model.save((err, result) => {
+                    if (err) {
+                        console.log(err)
+                        res.sendStatus(500)
+                    }
+
+                    res.send(result)
                 })
             })
 

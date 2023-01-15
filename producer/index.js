@@ -32,10 +32,11 @@ amqp.connect('amqp://rabbitmq:5672', (err0, connection) => {
             channel.bindQueue(q2.queue, exchange, '')
         })
 
-        app.delete('/*/:id', (req, res) => {
+        app.delete('/kweet/:id', (req, res) => {
+            const id = req.params.id
             const data = {
                 body: req.body,
-                id: req.params.id
+                id: id
             }
 
             channel.publish('kwetter', '', Buffer.from(JSON.stringify(data)))
